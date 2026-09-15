@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { env } from "@/lib/config/env";
-import { getRequestOrigin } from "@/lib/config/request-origin";
+import { loadCachedPreferences } from "@/lib/progress/load-preferences";
+import { loadProgress } from "@/lib/progress/load-progress";
 import type {
   DegradedSource,
   ProgressAggregate,
-  ProgressPreferences,
 } from "@/lib/progress/types";
 import { preferencesStoreKind } from "@/lib/progress/preferences-repo";
 import { BreakdownModal } from "./breakdown-modal";
@@ -30,7 +30,6 @@ export default async function ProgressPage({
 }) {
   const params = await searchParams;
   const distId = params.distId ?? env.defaultDistId;
-  const origin = await getRequestOrigin();
   const returnQuery = new URLSearchParams();
   if (params.fail) returnQuery.set("fail", params.fail);
   if (params.empty) returnQuery.set("empty", params.empty);
@@ -39,27 +38,10 @@ export default async function ProgressPage({
     ? `/progress?${returnQuery.toString()}`
     : "/progress";
 
-  const prefsUrl = new URL("/api/preferences", origin);
-  prefsUrl.searchParams.set("distId", distId);
-
-  const progressUrl = new URL("/backend/progress", origin);
-  if (params.fail) progressUrl.searchParams.set("fail", params.fail);
-  if (params.empty) progressUrl.searchParams.set("empty", params.empty);
-
-  const [prefsRes, progressRes] = await Promise.all([
-    fetch(prefsUrl, { next: { tags: ["preferences"], revalidate: 60 } }),
-    fetch(progressUrl, { cache: "no-store" }),
+  const [preferences, progress] = await Promise.all([
+    loadCachedPreferences(distId),
+    loadProgress({ fail: params.fail, empty: params.empty }),
   ]);
-
-  if (!prefsRes.ok) {
-    throw new Error(`Preferences handler failed (${prefsRes.status})`);
-  }
-  if (!progressRes.ok) {
-    throw new Error(`Progress handler failed (${progressRes.status})`);
-  }
-
-  const preferences = (await prefsRes.json()) as ProgressPreferences | null;
-  const progress = (await progressRes.json()) as ProgressAggregate;
 
   return (
     <div className="space-y-6">

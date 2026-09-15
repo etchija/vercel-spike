@@ -1,18 +1,13 @@
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { getPreferences, savePreferences } from "@/lib/progress/preferences-repo";
+import { savePreferences } from "@/lib/progress/preferences-repo";
+import { loadCachedPreferences } from "@/lib/progress/load-preferences";
 
 export const revalidate = 60;
 
-const loadPreferences = unstable_cache(
-  async (distId: string) => getPreferences(distId),
-  ["progress-preferences"],
-  { tags: ["preferences"], revalidate: 60 },
-);
-
 export async function GET(request: Request) {
   const distId = new URL(request.url).searchParams.get("distId") ?? "";
-  const prefs = await loadPreferences(distId);
+  const prefs = await loadCachedPreferences(distId);
   return Response.json(prefs);
 }
 
