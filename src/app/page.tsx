@@ -1,12 +1,20 @@
 import Image from "next/image";
+import Link from "next/link";
+import { env } from "@/lib/config/env";
 
 export default function Home() {
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <p className="text-sm font-semibold tracking-wide uppercase">
-          Spike stage: {process.env.NEXT_PUBLIC_SPIKE_STAGE ?? "unset"}
+          Spike stage: {env.spikeStage}
         </p>
+        <Link
+          href="/progress"
+          className="text-sm font-medium underline underline-offset-4"
+        >
+          Capstone D — rank progress
+        </Link>
         <Image
           className="dark:invert"
           src="/next.svg"

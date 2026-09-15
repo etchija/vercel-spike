@@ -18,7 +18,29 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "backend-origin/**",
     ],
+  },
+  {
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@vercel/kv",
+              message: "P1/P2: do not use Vercel storage. Use our repository seam.",
+            },
+          ],
+          patterns: [
+            {
+              group: ["@vercel/*"],
+              message: "P1/P2: no Vercel platform packages in this spike.",
+            },
+          ],
+        },
+      ],
+    },
   },
 ];
 

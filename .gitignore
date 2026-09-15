@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+backend-origin/node_modules/
+backend-origin/.next/
 
 # production
 /build
